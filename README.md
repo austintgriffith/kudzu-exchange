@@ -81,6 +81,14 @@ Run smart contract test with `yarn hardhat:test`
 - Edit your frontend in `packages/nextjs/pages`
 - Edit your deployment scripts in `packages/hardhat/deploy`
 
+
+Redeploy your contracts:
+
+```
+yarn deploy --reset
+```
+
+
 # 🔵 Deploy to Base
 
 
@@ -96,12 +104,6 @@ Fund the deployer account with ETH on Base at:
 
 ```
 yarn account
-```
-
-Redeploy:
-
-```
-yarn deploy --reset
 ```
 
 
