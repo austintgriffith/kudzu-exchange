@@ -81,7 +81,7 @@ Run smart contract test with `yarn hardhat:test`
 - Edit your frontend in `packages/nextjs/pages`
 - Edit your deployment scripts in `packages/hardhat/deploy`
 
-# Deploy to Base
+# 🔵 Deploy to Base
 
 
 When you are ready to deploy to Base, generate a deployer account: 
@@ -105,7 +105,7 @@ yarn deploy --reset
 ```
 
 
-🔵 Deploy to Base:
+Deploy to Base:
 
 ```
 yarn deploy --network base 
