@@ -98,19 +98,23 @@ Fund the deployer account with ETH on Base at:
 yarn account
 ```
 
+Redeploy:
+
+```
+yarn deploy --reset
+```
 
 
-Deploy to Base:
+🔵 Deploy to Base:
 
 ```
 yarn deploy --network base 
 ```
 
 
-Set your app to Base:
+Set your target network to Base:
 
-> Uncomment "chains.base" in targetNetworks from `scaffold.config.ts` in `packages/nextjs`
-
+> Change "chains.hardhat" to "chains.base" in targetNetworks from `scaffold.config.ts` in `packages/nextjs`
 
 
 Deploy your app to Vercel:
