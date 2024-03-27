@@ -81,6 +81,46 @@ Run smart contract test with `yarn hardhat:test`
 - Edit your frontend in `packages/nextjs/pages`
 - Edit your deployment scripts in `packages/hardhat/deploy`
 
+# Deploy to Base
+
+
+When you are ready to deploy to Base, generate a deployer account: 
+
+```
+yarn generate
+```
+
+
+
+Fund the deployer account with ETH on Base at:
+
+```
+yarn account
+```
+
+
+
+Deploy to Base:
+
+```
+yarn deploy --network base 
+```
+
+
+Set your app to Base:
+
+> Uncomment "chains.base" in targetNetworks from `scaffold.config.ts` in `packages/nextjs`
+
+
+
+Deploy your app to Vercel:
+
+```
+yarn vercel:yolo --prod
+```
+
+
+
 ## Documentation
 
 Visit our [docs](https://docs.scaffoldeth.io) to learn how to start building with Scaffold-ETH 2.
