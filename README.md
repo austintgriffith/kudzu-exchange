@@ -1,5 +1,5 @@
 
-# <img src="https://github.com/damianmarti/se-2/assets/466652/a795d1f3-980b-4e53-9784-ac53b6dd980e" width="35">🏗️ Scaffold-Base
+# 🏗️ Scaffold-Base <img src="https://github.com/damianmarti/se-2/assets/466652/a795d1f3-980b-4e53-9784-ac53b6dd980e" width="35">
 
 <h4 align="center">
   <a href="https://docs.scaffoldeth.io">Documentation</a> |
