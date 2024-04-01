@@ -125,6 +125,17 @@ Deploy your app to Vercel:
 yarn vercel:yolo --prod
 ```
 
+# 🍽️ Fork Mainnet Base
+
+> stop your `yarn chain`
+
+```
+
+yarn fork
+
+```
+
+(now your local hardhat chain is a fork of Base and you can talk to forked Base contracts)
 
 
 ## Documentation

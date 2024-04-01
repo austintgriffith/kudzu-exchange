@@ -42,9 +42,17 @@ const config: HardhatUserConfig = {
     // If the network you are looking for is not here you can add new network settings
     hardhat: {
       forking: {
-        url: `https://eth-mainnet.alchemyapi.io/v2/${providerApiKey}`,
+        url: `https://mainnet.base.org`,
         enabled: process.env.MAINNET_FORKING_ENABLED === "true",
       },
+    },
+    base: {
+      url: "https://mainnet.base.org",
+      accounts: [deployerPrivateKey],
+    },
+    baseSepolia: {
+      url: "https://sepolia.base.org",
+      accounts: [deployerPrivateKey],
     },
     mainnet: {
       url: `https://eth-mainnet.alchemyapi.io/v2/${providerApiKey}`,
@@ -92,14 +100,6 @@ const config: HardhatUserConfig = {
     },
     chiado: {
       url: "https://rpc.chiadochain.net",
-      accounts: [deployerPrivateKey],
-    },
-    base: {
-      url: "https://mainnet.base.org",
-      accounts: [deployerPrivateKey],
-    },
-    baseSepolia: {
-      url: "https://sepolia.base.org",
       accounts: [deployerPrivateKey],
     },
     scrollSepolia: {
