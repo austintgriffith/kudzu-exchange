@@ -32,6 +32,12 @@ const Home: NextPage = () => {
     args: [connectedAddress, addressToInfect, yourKudzuTokenId || 0n],
   });
 
+  const { data: alreadyHasKudzu } = useScaffoldContractRead({
+    contractName: "KUDZU",
+    functionName: "tokenOfOwnerByIndex",
+    args: [addressToPubInfect, 0n],
+  });
+
   return (
     <>
       <div className="flex items-center flex-col flex-grow pt-10">
@@ -42,6 +48,19 @@ const Home: NextPage = () => {
             value={addressToPubInfect}
             onChange={v => setAddressToPubInfect(v)}
           />
+          {alreadyHasKudzu ? (
+            <p className="text-red-500">
+              <a
+                target="_blank"
+                href={"https://opensea.io/assets/base/0x94e84f2dbb9b068ea01db531e7343ec2385b7052/" + alreadyHasKudzu}
+              >
+                {" "}
+                This address already has a Kudzu here!
+              </a>
+            </p>
+          ) : (
+            ""
+          )}
           <button
             className="btn btn-primary"
             onClick={() => {
