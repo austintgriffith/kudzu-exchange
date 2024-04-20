@@ -77,7 +77,9 @@ const Home: NextPage = () => {
               <div className="flex content-center">
                 <div className="content-center">
                   {" "}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
+                    alt="virus"
                     style={{ maxWidth: 250 }}
                     src={"https://virus.folia.app/img/base/" + yourKudzuTokenId?.toString()}
                   />
