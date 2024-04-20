@@ -90,7 +90,7 @@ export const KudzuContainer = ({ contractAddress, mustBeForSale, mustBeOwnedBy }
       {tokenIndex ? (
         <>
           <div className="m-4">
-            <img src={"https://virus.folia.app/img/base/" + tokenIndex?.toString()} />
+            <img alt="virus" src={"https://virus.folia.app/img/base/" + tokenIndex?.toString()} />
           </div>
         </>
       ) : (
