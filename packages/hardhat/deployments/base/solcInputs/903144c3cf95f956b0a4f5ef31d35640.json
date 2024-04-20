@@ -1,0 +1,47 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "@openzeppelin/contracts/access/Ownable.sol": {
+      "content": "// SPDX-License-Identifier: MIT\n// OpenZeppelin Contracts (last updated v4.9.0) (access/Ownable.sol)\n\npragma solidity ^0.8.0;\n\nimport \"../utils/Context.sol\";\n\n/**\n * @dev Contract module which provides a basic access control mechanism, where\n * there is an account (an owner) that can be granted exclusive access to\n * specific functions.\n *\n * By default, the owner account will be the one that deploys the contract. This\n * can later be changed with {transferOwnership}.\n *\n * This module is used through inheritance. It will make available the modifier\n * `onlyOwner`, which can be applied to your functions to restrict their use to\n * the owner.\n */\nabstract contract Ownable is Context {\n    address private _owner;\n\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\n\n    /**\n     * @dev Initializes the contract setting the deployer as the initial owner.\n     */\n    constructor() {\n        _transferOwnership(_msgSender());\n    }\n\n    /**\n     * @dev Throws if called by any account other than the owner.\n     */\n    modifier onlyOwner() {\n        _checkOwner();\n        _;\n    }\n\n    /**\n     * @dev Returns the address of the current owner.\n     */\n    function owner() public view virtual returns (address) {\n        return _owner;\n    }\n\n    /**\n     * @dev Throws if the sender is not the owner.\n     */\n    function _checkOwner() internal view virtual {\n        require(owner() == _msgSender(), \"Ownable: caller is not the owner\");\n    }\n\n    /**\n     * @dev Leaves the contract without owner. It will not be possible to call\n     * `onlyOwner` functions. Can only be called by the current owner.\n     *\n     * NOTE: Renouncing ownership will leave the contract without an owner,\n     * thereby disabling any functionality that is only available to the owner.\n     */\n    function renounceOwnership() public virtual onlyOwner {\n        _transferOwnership(address(0));\n    }\n\n    /**\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\n     * Can only be called by the current owner.\n     */\n    function transferOwnership(address newOwner) public virtual onlyOwner {\n        require(newOwner != address(0), \"Ownable: new owner is the zero address\");\n        _transferOwnership(newOwner);\n    }\n\n    /**\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\n     * Internal function without access restriction.\n     */\n    function _transferOwnership(address newOwner) internal virtual {\n        address oldOwner = _owner;\n        _owner = newOwner;\n        emit OwnershipTransferred(oldOwner, newOwner);\n    }\n}\n"
+    },
+    "@openzeppelin/contracts/utils/Context.sol": {
+      "content": "// SPDX-License-Identifier: MIT\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\n\npragma solidity ^0.8.0;\n\n/**\n * @dev Provides information about the current execution context, including the\n * sender of the transaction and its data. While these are generally available\n * via msg.sender and msg.data, they should not be accessed in such a direct\n * manner, since when dealing with meta-transactions the account sending and\n * paying for execution may not be the actual sender (as far as an application\n * is concerned).\n *\n * This contract is only required for intermediate, library-like contracts.\n */\nabstract contract Context {\n    function _msgSender() internal view virtual returns (address) {\n        return msg.sender;\n    }\n\n    function _msgData() internal view virtual returns (bytes calldata) {\n        return msg.data;\n    }\n}\n"
+    },
+    "contracts/BasedKudzuContainer.sol": {
+      "content": "//SPDX-License-Identifier: MIT\npragma solidity >=0.8.0 <0.9.0;\n\n// Use openzeppelin to inherit battle-tested implementations (ERC20, ERC721, etc)\nimport \"@openzeppelin/contracts/access/Ownable.sol\";\n\ninterface KUDZU {\n    function approve(address to, uint256 tokenId) external;\n    function balanceOf(address owner) external view returns (uint256);\n    function tokenOfOwnerByIndex(address owner, uint256 index)\n        external\n        view\n        returns (uint256);\n    function tokenURI(uint256 tokenId) external view returns (string memory);\n    function transferFrom(\n        address from,\n        address to,\n        uint256 tokenId\n    ) external;\n}\n\n/**\n * A smart contract that allows changing a state variable of the contract and tracking the changes\n * It also allows the owner to withdraw the Ether in the contract\n * @author BuidlGuidl\n */\ncontract BasedKudzuContainer is Ownable {\n\n\tKUDZU public kudzuContract = KUDZU(0x94E84f2DBB9b068eA01DB531E7343ec2385B7052);\n\n\tfunction isInfected() public view returns (bool) {\n\t\treturn kudzuContract.balanceOf(address(this)) > 0;\n\t}\n\n\tfunction infectedWithTokenId() public view returns (uint256) {\n\t\tif(!isInfected()) {\n\t\t\treturn 0;\n\t\t}\n\t\treturn kudzuContract.tokenOfOwnerByIndex(address(this),0);\n\t}\n\n\tfunction tokenURI() public view returns (string memory) {\n\t\tif(!isInfected()) {\n\t\t\treturn \"\";\n\t\t}\n\t\treturn kudzuContract.tokenURI(kudzuContract.tokenOfOwnerByIndex(address(this),0));\n\t}\n\n\tfunction infect(address toAddress) public onlyOwner {\n\t\trequire(isInfected(), \"not infected yet\");\n\t\tkudzuContract.transferFrom(address(this),toAddress,kudzuContract.tokenOfOwnerByIndex(address(this),0));\n\t}\n\n\tbool public canPubliclyInfect = false;\n\n\tfunction setCanPubliclyInfect(bool _canPubliclyInfect) public onlyOwner {\n\t\tcanPubliclyInfect = _canPubliclyInfect;\n\t}\n\n\tfunction publiclyInfect(address toAddress) public {\n\t\trequire(isInfected(), \"not infected yet\");\n\t\trequire(canPubliclyInfect, \"public infection is disabled by owner for this container\");\n\t\tkudzuContract.transferFrom(address(this),toAddress,kudzuContract.tokenOfOwnerByIndex(address(this),0));\n\t}\n\n\tconstructor(address _owner) {\n\t\ttransferOwnership(_owner);\n\t}\n\n\tfunction execute(address _to, uint256 _value, bytes memory _data) public payable onlyOwner {\n\t\t// Call the external contract\n\t\t(bool success, ) = _to.call{value: _value}(_data);\n\t\trequire(success, \"Failed to execute contract\");\n\t}\n\t\t\n\treceive() external payable {}\n}\n"
+    },
+    "contracts/BasedKudzuContainerForSale.sol": {
+      "content": "//SPDX-License-Identifier: MIT\npragma solidity >=0.8.0 <0.9.0;\n\n// Use openzeppelin to inherit battle-tested implementations (ERC20, ERC721, etc)\nimport \"@openzeppelin/contracts/access/Ownable.sol\";\n\nimport \"./BasedKudzuContainer.sol\";\n\n/**\n * A smart contract that allows changing a state variable of the contract and tracking the changes\n * It also allows the owner to withdraw the Ether in the contract\n * @author BuidlGuidl\n */\ncontract BasedKudzuContainerForSale is BasedKudzuContainer {\n\n\taddress public benificiary = 0x00080706a7D99CBC163D52dcF435205B1aD940D1; //safe.buidlguidl.eth\n\n\tuint256 public price = 0;\n\n\tfunction isForSale() public view returns (bool) {\n\t\treturn price > 0.000001 ether;\n\t}\n\n\tfunction setPrice(uint256 _price) public onlyOwner {\n\t\tprice = _price;\n\t}\n\n\tfunction purchase() public payable {\n\t\trequire(msg.value >= price, \"not enough base ether sent\");\n\n\t\tprice=0;\n\t\t\n\t\tcanPubliclyInfect=false;\n\n\t\taddress previousOwner = owner();\n\n\t\t_transferOwnership(msg.sender);\n\n\t\tuint256 onePercent = msg.value / 100;\n\n\t\t(bool success, ) = previousOwner.call{value: msg.value-onePercent}(\"\");\n\t\trequire(success, \"purchase failed\");\n\n\t\t(bool success2, ) = benificiary.call{value: onePercent}(\"\");\n\t\trequire(success2, \"purchase failed\");\n\t}\n\n\tconstructor(address _owner) BasedKudzuContainer(_owner){}\n}\n"
+    },
+    "contracts/BasedKudzuContainerForSaleFactory.sol": {
+      "content": "//SPDX-License-Identifier: MIT\npragma solidity >=0.8.0 <0.9.0;\n\n\nimport \"./BasedKudzuContainerForSale.sol\";\n\n/**\n * A smart contract that allows changing a state variable of the contract and tracking the changes\n * It also allows the owner to withdraw the Ether in the contract\n * @author BuidlGuidl\n */\ncontract BasedKudzuContainerForSaleFactory {\n\taddress public benificiary = 0x00080706a7D99CBC163D52dcF435205B1aD940D1; //safe.buidlguidl.eth\n\n\tevent Created(address indexed owner, address indexed contractAddress);\n\n\tfunction create(address _owner) public payable returns (address) {\n\t\t(bool success, ) = benificiary.call{value: msg.value}(\"\");\n\t\trequire(success, \"create failed\");\n\t\taddress _contractAddress = address(new BasedKudzuContainerForSale(_owner));\n\t\temit Created(_owner, _contractAddress);\n\t\treturn _contractAddress;\n\t}\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

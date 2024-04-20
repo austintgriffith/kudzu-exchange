@@ -210,10 +210,8 @@ const deployedContracts = {
         transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
       },
     },
-  },
-  31337: {
-    BasedKudzuContainer: {
-      address: "0x4C4a2f8c81640e47606d3fd77B353E87Ba015584",
+    BasedKudzuContainerForSale: {
+      address: "0xA0077F64af72ca5075bE41A82678a0Ad684c8200",
       abi: [
         {
           inputs: [
@@ -244,6 +242,19 @@ const deployedContracts = {
           ],
           name: "OwnershipTransferred",
           type: "event",
+        },
+        {
+          inputs: [],
+          name: "benificiary",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
         },
         {
           inputs: [],
@@ -309,6 +320,19 @@ const deployedContracts = {
         },
         {
           inputs: [],
+          name: "isForSale",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
           name: "isInfected",
           outputs: [
             {
@@ -347,6 +371,19 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [],
+          name: "price",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
           inputs: [
             {
               internalType: "address",
@@ -357,6 +394,13 @@ const deployedContracts = {
           name: "publiclyInfect",
           outputs: [],
           stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "purchase",
+          outputs: [],
+          stateMutability: "payable",
           type: "function",
         },
         {
@@ -375,6 +419,19 @@ const deployedContracts = {
             },
           ],
           name: "setCanPubliclyInfect",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_price",
+              type: "uint256",
+            },
+          ],
+          name: "setPrice",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -411,10 +468,76 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {
-        owner: "@openzeppelin/contracts/access/Ownable.sol",
-        renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
-        transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        canPubliclyInfect: "contracts/BasedKudzuContainer.sol",
+        execute: "contracts/BasedKudzuContainer.sol",
+        infect: "contracts/BasedKudzuContainer.sol",
+        infectedWithTokenId: "contracts/BasedKudzuContainer.sol",
+        isInfected: "contracts/BasedKudzuContainer.sol",
+        kudzuContract: "contracts/BasedKudzuContainer.sol",
+        owner: "contracts/BasedKudzuContainer.sol",
+        publiclyInfect: "contracts/BasedKudzuContainer.sol",
+        renounceOwnership: "contracts/BasedKudzuContainer.sol",
+        setCanPubliclyInfect: "contracts/BasedKudzuContainer.sol",
+        tokenURI: "contracts/BasedKudzuContainer.sol",
+        transferOwnership: "contracts/BasedKudzuContainer.sol",
       },
+    },
+    BasedKudzuContainerForSaleFactory: {
+      address: "0x14Ac3ec55cE5865E1e9a83FC90f22465BB982434",
+      abi: [
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "contractAddress",
+              type: "address",
+            },
+          ],
+          name: "Created",
+          type: "event",
+        },
+        {
+          inputs: [],
+          name: "benificiary",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_owner",
+              type: "address",
+            },
+          ],
+          name: "create",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "payable",
+          type: "function",
+        },
+      ],
+      inheritedFunctions: {},
     },
   },
 } as const;

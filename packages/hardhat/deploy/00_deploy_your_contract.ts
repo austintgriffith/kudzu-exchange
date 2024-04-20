@@ -22,10 +22,20 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
 
-  await deploy("BasedKudzuContainer", {
+  await deploy("BasedKudzuContainerForSale", {
     from: deployer,
     // Contract constructor arguments
     args: ["0x34aA3F359A9D614239015126635CE7732c18fDF3"],
+    log: true,
+    // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
+    // automatically mining the contract deployment transaction. There is no effect on live networks.
+    autoMine: true,
+  });
+
+  await deploy("BasedKudzuContainerForSaleFactory", {
+    from: deployer,
+    // Contract constructor arguments
+    args: [],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.

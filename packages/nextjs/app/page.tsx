@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { NextPage } from "next";
+import { parseEther } from "viem";
 import { useAccount } from "wagmi";
+import { KudzuContainer } from "~~/components/KudzuContainer";
 import { Address, AddressInput } from "~~/components/scaffold-eth";
-import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { useScaffoldContractRead, useScaffoldContractWrite, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
@@ -20,7 +23,7 @@ const Home: NextPage = () => {
   const [addressToPubInfect, setAddressToPubInfect] = useState<string>("");
 
   const { writeAsync: pubInfectFromYourKudzu } = useScaffoldContractWrite({
-    contractName: "BasedKudzuContainer",
+    contractName: "BasedKudzuContainerForSale",
     functionName: "publiclyInfect",
     args: [addressToPubInfect],
   });
@@ -36,6 +39,33 @@ const Home: NextPage = () => {
     contractName: "KUDZU",
     functionName: "tokenOfOwnerByIndex",
     args: [addressToPubInfect, 0n],
+  });
+
+  const { data: allContainers } = useScaffoldEventHistory({
+    contractName: "BasedKudzuContainerForSaleFactory",
+    eventName: "Created",
+    fromBlock: 10361383n,
+    watch: true,
+    /*filters: { owner: "" + connectedAddress },*/
+    blockData: false,
+    transactionData: false,
+    receiptData: false,
+  });
+
+  const { writeAsync: deployContainer } = useScaffoldContractWrite({
+    contractName: "BasedKudzuContainerForSaleFactory",
+    functionName: "create",
+    args: [connectedAddress],
+    value: parseEther("0.00005"),
+  });
+
+  const router = useRouter();
+
+  let i = 0;
+  const containerRender = allContainers?.map((container: any) => {
+    return (
+      <KudzuContainer key={i++} contractAddress={container.args.contractAddress} mustBeOwnedBy={connectedAddress} />
+    );
   });
 
   return (
@@ -62,12 +92,12 @@ const Home: NextPage = () => {
             ""
           )}
           <button
-            className="btn btn-primary"
+            className="btn btn-secondary"
             onClick={() => {
               pubInfectFromYourKudzu();
             }}
           >
-            infect
+            🦠 infect
           </button>
         </div>
         {yourKudzuTokenId ? (
@@ -92,13 +122,37 @@ const Home: NextPage = () => {
             <AddressInput value={addressToInfect} onChange={v => setAddressToInfect(v)} placeholder="0xSomeAddress" />
 
             <button
-              className="btn btn-primary"
+              className="btn btn-secondary"
               onClick={() => {
                 infectFromYourKudzu();
               }}
             >
-              infect from your kudzu
+              🦠 infect from your kudzu
             </button>
+
+            <div className="pt-8">
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  router.push("/buy");
+                }}
+              >
+                💵 buy kudzu containers
+              </button>
+            </div>
+
+            <div className="pt-8">
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  deployContainer();
+                }}
+              >
+                🧫 deploy a kudzu container smart contract
+              </button>
+
+              {containerRender}
+            </div>
           </div>
         ) : (
           ""
