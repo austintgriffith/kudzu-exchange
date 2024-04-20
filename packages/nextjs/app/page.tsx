@@ -100,65 +100,77 @@ const Home: NextPage = () => {
             🦠 infect
           </button>
         </div>
-        {yourKudzuTokenId ? (
-          <div className="px-5 mt-10">
-            <h1 className="text-center">
-              <div className="content-center"> 🦠 YOU ARE INFECTED WITH KUDZU:</div>
-              <div className="flex content-center">
-                <div className="content-center">
-                  {" "}
-                  <img
-                    alt="virus"
-                    style={{ maxWidth: 250 }}
-                    src={"https://virus.folia.app/img/base/" + yourKudzuTokenId?.toString()}
-                  />
-                </div>
+      </div>
+      <div className="divider p-12"></div>
+      {yourKudzuTokenId ? (
+        <div className="flex items-center flex-col flex-grow pt-10">
+          <h1 className="text-center">
+            <div className="content-center"> 🦠 YOU ARE INFECTED WITH KUDZU:</div>
+            <div className="flex content-center">
+              <div className="content-center">
+                {" "}
+                <img
+                  alt="virus"
+                  style={{ maxWidth: 250 }}
+                  src={"https://virus.folia.app/img/base/" + yourKudzuTokenId?.toString()}
+                />
               </div>
-            </h1>
-            <div className="flex justify-center items-center space-x-2">
-              <p className="my-2 font-medium">Connected Address:</p>
-              <Address address={connectedAddress} />
             </div>
+          </h1>
+          <div className="flex justify-center items-center space-x-2">
+            <p className="my-2 font-medium">Connected Address:</p>
+            <Address address={connectedAddress} />
+          </div>
 
-            <AddressInput value={addressToInfect} onChange={v => setAddressToInfect(v)} placeholder="0xSomeAddress" />
+          <AddressInput value={addressToInfect} onChange={v => setAddressToInfect(v)} placeholder="0xSomeAddress" />
 
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              infectFromYourKudzu();
+            }}
+          >
+            🦠 infect from your kudzu
+          </button>
+          <div className="divider p-12"></div>
+          <div>
             <button
               className="btn btn-secondary"
               onClick={() => {
-                infectFromYourKudzu();
+                router.push("/buy");
               }}
             >
-              🦠 infect from your kudzu
+              💵 buy kudzu containers
+            </button>
+          </div>
+          <div className="divider p-12"></div>
+          <div>
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                deployContainer();
+              }}
+            >
+              🧫 deploy a kudzu container smart contract
             </button>
 
-            <div className="pt-8">
-              <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  router.push("/buy");
-                }}
-              >
-                💵 buy kudzu containers
-              </button>
-            </div>
-
-            <div className="pt-8">
-              <button
-                className="btn btn-secondary"
-                onClick={() => {
-                  deployContainer();
-                }}
-              >
-                🧫 deploy a kudzu container smart contract
-              </button>
-
-              {containerRender}
-            </div>
+            {containerRender}
           </div>
-        ) : (
-          ""
-        )}
-      </div>
+          <div className="divider p-12"></div>
+          <div>
+            <button
+              className="btn btn-secondary"
+              onClick={() => {
+                router.push("/debug");
+              }}
+            >
+              📄 smart contracts
+            </button>
+          </div>
+        </div>
+      ) : (
+        ""
+      )}
     </>
   );
 };

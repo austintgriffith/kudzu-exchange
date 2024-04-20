@@ -54,6 +54,14 @@ export const KudzuContainer = ({ contractAddress, mustBeForSale, mustBeOwnedBy }
     watch: true,
   });
 
+  const { data: isInfected } = useContractRead({
+    chainId: targetNetwork.id,
+    functionName: "isInfected",
+    address: contractAddress,
+    abi: deployedContractData?.abi,
+    watch: true,
+  });
+
   const { writeAsync: purchase } = useContractWrite({
     chainId: targetNetwork.id,
     address: contractAddress,
@@ -97,56 +105,58 @@ export const KudzuContainer = ({ contractAddress, mustBeForSale, mustBeOwnedBy }
         "Not infected yet."
       )}
 
-      {true ? (
-        <>
-          <div className="m-4"></div>
-          {owner?.toLocaleLowerCase() === address?.toLocaleLowerCase() ? (
-            <div>
-              <div className={"mb-8"}>
-                infect address from this kudzu:
-                <AddressInput
-                  placeholder="0xYourAddress"
-                  value={addressToPubInfect}
-                  onChange={v => setAddressToPubInfect(v)}
-                />
-                <button
-                  className={"btn"}
-                  onClick={() => {
-                    infect();
-                  }}
-                >
-                  🦠 infect
-                </button>
-              </div>
-              <div>
-                current price:
-                <BalanceValue value={price ? formatEther(price) : "0"} usdMode={true} />
-                new price:
-                <EtherInput usdMode={true} value={ethAmount} onChange={amount => setEthAmount(amount)} />
-                <button
-                  className={"btn"}
-                  onClick={() => {
-                    setPrice();
-                  }}
-                >
-                  💵 set price
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button
-              className={"btn"}
-              onClick={() => {
-                purchase();
-              }}
-            >
-              💵 buy for <BalanceValue value={price ? formatEther(price) : "0"} usdMode={true} />
-            </button>
-          )}
-        </>
-      ) : (
-        ""
-      )}
+      <>
+        <div className="m-4"></div>
+        {owner?.toLocaleLowerCase() === address?.toLocaleLowerCase() ? (
+          <div>
+            {isInfected ? (
+              <>
+                <div className={"mb-8"}>
+                  infect address from this kudzu:
+                  <AddressInput
+                    placeholder="0xYourAddress"
+                    value={addressToPubInfect}
+                    onChange={v => setAddressToPubInfect(v)}
+                  />
+                  <button
+                    className={"btn"}
+                    onClick={() => {
+                      infect();
+                    }}
+                  >
+                    🦠 infect
+                  </button>
+                </div>
+                <div>
+                  current price:
+                  <BalanceValue value={price ? formatEther(price) : "0"} usdMode={true} />
+                  new price:
+                  <EtherInput usdMode={true} value={ethAmount} onChange={amount => setEthAmount(amount)} />
+                  <button
+                    className={"btn"}
+                    onClick={() => {
+                      setPrice();
+                    }}
+                  >
+                    💵 set price
+                  </button>
+                </div>
+              </>
+            ) : (
+              ""
+            )}
+          </div>
+        ) : (
+          <button
+            className={"btn"}
+            onClick={() => {
+              purchase();
+            }}
+          >
+            💵 buy for <BalanceValue value={price ? formatEther(price) : "0"} usdMode={true} />
+          </button>
+        )}
+      </>
     </div>
   );
 };
