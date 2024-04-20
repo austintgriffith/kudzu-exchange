@@ -1,32 +1,47 @@
 /** @jsxImportSource frog/jsx */
-import { Button, Frog } from "frog";
+import { Button, Frog, TextInput } from "frog";
 import { devtools } from "frog/dev";
 import { handle } from "frog/next";
 import { serveStatic } from "frog/serve-static";
+import deployedContracts from "~~/contracts/deployedContracts";
+
+const abi = deployedContracts[8453].BasedKudzuContainer.abi;
+const contractAddress = deployedContracts[8453].BasedKudzuContainer.address;
 
 const app = new Frog({
   basePath: "/api",
 });
 
 app.frame("/", c => {
-  const { buttonValue, status } = c;
   return c.res({
-    image: (
-      <div style={{ color: "white", display: "flex", fontSize: 60 }}>
-        {status === "initial" ? "Select your fruit!" : `Selected: ${buttonValue}`}
-      </div>
-    ),
+    action: "/finish",
+    image: <div style={{ color: "white", display: "flex", fontSize: 60 }}>Perform a transaction</div>,
     intents: [
-      <Button key="apple" value="apple">
-        Apple
-      </Button>,
-      <Button key="banana" value="banana">
-        Banana
-      </Button>,
-      <Button key="mango" value="mango">
-        Mango
-      </Button>,
+      <TextInput key="0xYourAddress" placeholder="0xAddressToInfect" />,
+      <Button.Transaction key="infect" target="/infect">
+        Infect
+      </Button.Transaction>,
     ],
+  });
+});
+
+app.frame("/finish", c => {
+  const { transactionId } = c;
+  return c.res({
+    image: <div style={{ color: "white", display: "flex", fontSize: 60 }}>Transaction ID: {transactionId}</div>,
+  });
+});
+
+app.transaction("/infect", c => {
+  const addressToInfect = c.inputText as `0x${string}`;
+
+  // Contract transaction response.
+  return c.contract({
+    abi,
+    chainId: "eip155:8453",
+    functionName: "publiclyInfect",
+    args: [addressToInfect],
+    to: contractAddress,
   });
 });
 
