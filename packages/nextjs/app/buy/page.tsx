@@ -8,7 +8,7 @@ import { KudzuContainer } from "~~/components/KudzuContainer";
 const Buy: NextPage = () => {
   const ContainersQuery = gql`
     query Containers($after: String, $before: String) {
-      containers(limit: 50, before: $before, after: $after) {
+      containers(limit: 100, before: $before, after: $after) {
         items {
           owner
           contract

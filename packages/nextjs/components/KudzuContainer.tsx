@@ -6,6 +6,7 @@ import { BalanceValue } from "./scaffold-eth/BalanceValue";
 import { Abi } from "abitype";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
+import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useDeployedContractInfo, useScaffoldContractRead } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 
@@ -146,7 +147,7 @@ export const KudzuContainer = ({ contractAddress, mustBeForSale, mustBeOwnedBy }
               ""
             )}
           </div>
-        ) : (
+        ) : address ? (
           <button
             className={"btn"}
             onClick={() => {
@@ -155,6 +156,8 @@ export const KudzuContainer = ({ contractAddress, mustBeForSale, mustBeOwnedBy }
           >
             💵 buy for <BalanceValue value={price ? formatEther(price) : "0"} usdMode={true} />
           </button>
+        ) : (
+          <RainbowKitCustomConnectButton text="Connect Wallet to Buy" />
         )}
       </>
     </div>
