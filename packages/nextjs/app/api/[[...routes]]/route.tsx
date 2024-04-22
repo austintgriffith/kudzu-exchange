@@ -197,7 +197,9 @@ app.frame("/finish", async c => {
             <Heading color="text" align="center">
               Infection Successful
             </Heading>
-            <Box>{tokenId && <img alt="virus" src={imageUrl} width={400} height={400} />}</Box>
+            <Box width="100%" alignHorizontal="center">
+              {tokenId && <img alt="virus" src={imageUrl} width={400} height={400} />}
+            </Box>
           </Box>
         ),
         intents: [
