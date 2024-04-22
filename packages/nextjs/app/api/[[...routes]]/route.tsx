@@ -1,6 +1,7 @@
 /** @jsxImportSource frog/jsx */
 
 /* eslint-disable react/jsx-key */
+import { Box, Heading, Spacer, vars } from "./ui.js";
 import { Button, Frog, TextInput } from "frog";
 import { devtools } from "frog/dev";
 import { handle } from "frog/next";
@@ -40,6 +41,7 @@ const app = new Frog<{ State: State }>({
     address: "",
     ens: "",
   },
+  ui: { vars },
 });
 
 // Initial Frame
@@ -48,137 +50,6 @@ app.frame("/", c => {
     action: "/check-address",
     image: `${baseUrl}/kudzu-frame-initial-og.png`,
     intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Infect</Button>],
-  });
-});
-
-// Check if inputText is a valid address or ENS and store to state
-app.frame("/check-address", async c => {
-  const { inputText = "", deriveState } = c;
-
-  // Input is a valid address
-  if (isAddress(inputText)) {
-    deriveState(prevState => {
-      if (isAddress(inputText)) {
-        prevState.address = inputText;
-      }
-    });
-
-    return c.res({
-      action: "/finish",
-      image: (
-        <div
-          style={{
-            backgroundColor: "#0A0A0B",
-            height: "100%",
-            width: "100%",
-            color: "white",
-            display: "flex",
-            flexDirection: "column",
-            gap: 24,
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: 50,
-            paddingTop: 24,
-          }}
-        >
-          <div style={{ display: "flex" }}>The Address:</div>
-          <div style={{ display: "flex", fontSize: 44 }}>{inputText}</div>
-          <div style={{ display: "flex", paddingTop: 24 }}>Is Ready To Infect</div>
-        </div>
-      ),
-      intents: [<Button.Transaction target="/infect">Infect!</Button.Transaction>],
-    });
-  }
-
-  try {
-    const ensAddress = await mainnetPublicClient.getEnsAddress({
-      name: normalize(inputText),
-    });
-
-    // Input is a valid ENS address on Mainnet
-    if (ensAddress) {
-      deriveState(prevState => {
-        if (isAddress(ensAddress)) {
-          prevState.address = ensAddress;
-          prevState.ens = inputText;
-        }
-      });
-
-      return c.res({
-        action: "/finish",
-        image: (
-          <div
-            style={{
-              backgroundColor: "#0A0A0B",
-              height: "100%",
-              width: "100%",
-              color: "white",
-              display: "flex",
-              flexDirection: "column",
-              gap: 24,
-              justifyContent: "center",
-              alignItems: "center",
-              fontSize: 50,
-              paddingTop: 24,
-            }}
-          >
-            <div style={{ display: "flex" }}>The Address:</div>
-            <div style={{ display: "flex", fontSize: 44 }}>{ensAddress}</div>
-            <div style={{ display: "flex", paddingTop: 24 }}>Is Ready To Infect</div>
-          </div>
-        ),
-        intents: [<Button.Transaction target="/infect">Infect!</Button.Transaction>],
-      });
-    }
-  } catch (error) {
-    return c.res({
-      image: (
-        <div
-          style={{
-            backgroundColor: "#0A0A0B",
-            height: "100%",
-            width: "100%",
-            color: "white",
-            display: "flex",
-            flexDirection: "column",
-            gap: 24,
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: 50,
-            paddingTop: 24,
-          }}
-        >
-          <div style={{ display: "flex" }}>Invalid Address or ENS</div>
-          <div style={{ display: "flex" }}>Please Try Again!</div>
-        </div>
-      ),
-      intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Try Again</Button>],
-    });
-  }
-
-  // Input is NOT valid address or ENS
-  return c.res({
-    image: (
-      <div
-        style={{
-          backgroundColor: "#0A0A0B",
-          height: "100%",
-          width: "100%",
-          color: "white",
-          display: "flex",
-          flexDirection: "column",
-          gap: 24,
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: 50,
-          paddingTop: 24,
-        }}
-      >
-        <div style={{ display: "flex" }}>Invalid Address or ENS</div>
-        <div style={{ display: "flex" }}>Please Try Again!</div>
-      </div>
-    ),
-    intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Try Again</Button>],
   });
 });
 
@@ -196,6 +67,113 @@ async function getTokenId(address: string) {
     console.log("error", error);
   }
 }
+
+// Check if inputText is a valid address or ENS and store to state
+app.frame("/check-address", async c => {
+  const { inputText = "", deriveState } = c;
+
+  // Input is a valid address
+  if (isAddress(inputText)) {
+    const tokenId = await getTokenId(inputText);
+    if (tokenId) {
+      return c.res({
+        image: (
+          <Box grow alignVertical="center" background="background" padding="32">
+            <Heading color="text" align="center">
+              This Address Is Already Infected
+            </Heading>
+          </Box>
+        ),
+        intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Try Another Address</Button>],
+      });
+    }
+
+    deriveState(prevState => {
+      prevState.address = inputText;
+    });
+
+    return c.res({
+      action: "/finish",
+      image: (
+        <Box grow alignVertical="center" background="background" padding="32" gap="8">
+          <Heading color="text" align="center">
+            The Address:
+          </Heading>
+          <Heading color="text" align="center" size="24">
+            {inputText}
+          </Heading>
+          <Spacer size="4" />
+          <Heading color="text" align="center">
+            Is Ready To Infect
+          </Heading>
+        </Box>
+      ),
+      intents: [<Button.Transaction target="/infect">Infect!</Button.Transaction>],
+    });
+  }
+
+  try {
+    const ensAddress = await mainnetPublicClient.getEnsAddress({
+      name: normalize(inputText),
+    });
+
+    // Input is a valid ENS address on Mainnet
+    if (ensAddress && isAddress(ensAddress)) {
+      deriveState(prevState => {
+        prevState.address = ensAddress;
+        prevState.ens = inputText;
+      });
+
+      return c.res({
+        action: "/finish",
+        image: (
+          <Box grow alignVertical="center" background="background" padding="32" gap="8">
+            <Heading color="text" align="center">
+              The Address:
+            </Heading>
+            <Heading color="text" align="center" size="24">
+              {ensAddress}
+            </Heading>
+            <Spacer size="4" />
+            <Heading color="text" align="center">
+              Is Ready To Infect
+            </Heading>
+          </Box>
+        ),
+        intents: [<Button.Transaction target="/infect">Infect!</Button.Transaction>],
+      });
+    }
+  } catch (error) {
+    return c.res({
+      image: (
+        <Box grow alignVertical="center" background="background" padding="32" gap="8">
+          <Heading color="text" align="center">
+            Invalid Address or ENS
+          </Heading>
+          <Heading color="text" align="center">
+            Please Try Again!
+          </Heading>
+        </Box>
+      ),
+      intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Try Again</Button>],
+    });
+  }
+
+  // Input is NOT valid address or ENS
+  return c.res({
+    image: (
+      <Box grow alignVertical="center" background="background" padding="32" gap="8">
+        <Heading color="text" align="center">
+          Invalid Address or ENS
+        </Heading>
+        <Heading color="text" align="center">
+          Please Try Again!
+        </Heading>
+      </Box>
+    ),
+    intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Try Again</Button>],
+  });
+});
 
 app.frame("/finish", async c => {
   const { transactionId, previousState } = c;
