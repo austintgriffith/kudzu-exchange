@@ -5,7 +5,7 @@ import { Button, Frog, TextInput } from "frog";
 import { devtools } from "frog/dev";
 import { handle } from "frog/next";
 import { serveStatic } from "frog/serve-static";
-import { createPublicClient, decodeEventLog, http, isAddress } from "viem";
+import { createPublicClient, http, isAddress } from "viem";
 import { base, mainnet } from "viem/chains";
 import { normalize } from "viem/ens";
 import deployedContracts from "~~/contracts/deployedContracts";
@@ -198,7 +198,7 @@ async function getTokenId(address: string) {
 }
 
 app.frame("/finish", async c => {
-  const { transactionId } = c;
+  const { transactionId, previousState } = c;
   const blockExplorerUrl = `${base.blockExplorers.default.url}/tx/${transactionId}`;
 
   if (transactionId) {
@@ -206,20 +206,9 @@ app.frame("/finish", async c => {
       hash: transactionId,
     });
 
+    // If the transaction was "success", get the tokenId and image of the new virus NFT.
     if (transaction.status === "success") {
-      // Getting Infect To Address from Event Logs
-      const topics = decodeEventLog({
-        abi: kudzuAbi,
-        data: "0x",
-        topics: transaction.logs[3].topics as [],
-      });
-
-      let toAddress = transaction.from;
-      if (topics.eventName === "Infect") {
-        toAddress = topics.args.to as `0x${string}`;
-      }
-
-      const tokenId = await getTokenId(toAddress);
+      const tokenId = await getTokenId(previousState.address);
 
       const imageUrl = `https://virus.folia.app/img/base/${tokenId}`;
       const openSeaUrl = `https://opensea.io/assets/base/0x94e84f2dbb9b068ea01db531e7343ec2385b7052/${tokenId}`;
@@ -251,8 +240,32 @@ app.frame("/finish", async c => {
         ],
       });
     }
+
+    // If for some reason the tx wasn't "success" - Just show the tx id.
+    return c.res({
+      image: (
+        <div
+          style={{
+            backgroundColor: "#0A0A0B",
+            height: "100%",
+            width: "100%",
+            color: "white",
+            display: "flex",
+            flexDirection: "column",
+            gap: 12,
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: 40,
+            paddingTop: 24,
+          }}
+        >
+          Unable to find Transaction Id
+        </div>
+      ),
+    });
   }
 
+  // If all else fails
   return c.res({
     image: (
       <div
@@ -270,7 +283,7 @@ app.frame("/finish", async c => {
           paddingTop: 24,
         }}
       >
-        <div>Infection Successful!</div>
+        <div>Transaction Id:</div>
         {transactionId}
       </div>
     ),
