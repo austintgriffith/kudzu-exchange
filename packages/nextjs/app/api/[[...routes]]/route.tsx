@@ -80,7 +80,7 @@ app.frame("/check-address", async c => {
         image: (
           <Box grow alignVertical="center" background="background" padding="32">
             <Heading color="text" align="center">
-              This Address Is Already Infected
+              This Address Is Already Infected!
             </Heading>
           </Box>
         ),
@@ -193,24 +193,12 @@ app.frame("/finish", async c => {
 
       return c.res({
         image: (
-          <div
-            style={{
-              backgroundColor: "#0A0A0B",
-              height: "100%",
-              width: "100%",
-              color: "white",
-              display: "flex",
-              flexDirection: "column",
-              gap: 24,
-              justifyContent: "center",
-              alignItems: "center",
-              fontSize: 50,
-              paddingTop: 24,
-            }}
-          >
-            <div>Infection Successful</div>
-            {tokenId && <img alt="virus" src={imageUrl} width={400} height={400} />}
-          </div>
+          <Box grow alignVertical="center" background="background" padding="32" gap="8">
+            <Heading color="text" align="center">
+              Infection Successful
+            </Heading>
+            <Box>{tokenId && <img alt="virus" src={imageUrl} width={400} height={400} />}</Box>
+          </Box>
         ),
         intents: [
           <Button.Link href={openSeaUrl}>View On OpenSea</Button.Link>,
@@ -222,23 +210,11 @@ app.frame("/finish", async c => {
     // If for some reason the tx wasn't "success" - Just show the tx id.
     return c.res({
       image: (
-        <div
-          style={{
-            backgroundColor: "#0A0A0B",
-            height: "100%",
-            width: "100%",
-            color: "white",
-            display: "flex",
-            flexDirection: "column",
-            gap: 12,
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: 40,
-            paddingTop: 24,
-          }}
-        >
-          Unable to find Transaction Id
-        </div>
+        <Box grow alignVertical="center" background="background" padding="32" gap="8">
+          <Heading color="text" align="center">
+            Unable to find Transaction Id
+          </Heading>
+        </Box>
       ),
     });
   }
@@ -246,24 +222,14 @@ app.frame("/finish", async c => {
   // If all else fails
   return c.res({
     image: (
-      <div
-        style={{
-          backgroundColor: "#0A0A0B",
-          height: "100%",
-          width: "100%",
-          color: "white",
-          display: "flex",
-          flexDirection: "column",
-          gap: 12,
-          justifyContent: "center",
-          alignItems: "center",
-          fontSize: 40,
-          paddingTop: 24,
-        }}
-      >
-        <div>Transaction Id:</div>
-        {transactionId}
-      </div>
+      <Box grow alignVertical="center" background="background" padding="32" gap="8">
+        <Heading color="text" align="center">
+          Transaction Id:
+        </Heading>
+        <Heading color="text" align="center" size="20">
+          {transactionId}
+        </Heading>
+      </Box>
     ),
     intents: [<Button.Link href={blockExplorerUrl}>View Transaction</Button.Link>],
   });
