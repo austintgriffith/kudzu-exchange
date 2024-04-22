@@ -64,7 +64,6 @@ async function getTokenId(address: string) {
 
     return tokenId.toString();
   } catch (error) {
-    console.log("error", error);
     return null;
   }
 }
