@@ -5,14 +5,21 @@ import { Button, Frog, TextInput } from "frog";
 import { devtools } from "frog/dev";
 import { handle } from "frog/next";
 import { serveStatic } from "frog/serve-static";
-import { createPublicClient, decodeEventLog, http } from "viem";
-import { base } from "viem/chains";
+import { PublicClient, createPublicClient, decodeEventLog, http, isAddress } from "viem";
+import { base, mainnet } from "viem/chains";
+import { normalize } from "viem/ens";
 import deployedContracts from "~~/contracts/deployedContracts";
 import externalContracts from "~~/contracts/externalContracts";
+import scaffoldConfig from "~~/scaffold.config";
 
 const publicClient = createPublicClient({
   chain: base,
   transport: http(),
+});
+
+export const mainnetPublicClient: PublicClient = createPublicClient({
+  chain: mainnet,
+  transport: http(`${mainnet.rpcUrls.alchemy.http[0]}/${scaffoldConfig.alchemyApiKey}`),
 });
 
 const abi = deployedContracts[base.id].BasedKudzuContainer.abi;
@@ -22,18 +29,156 @@ const kudzyContractAddress = externalContracts[base.id].KUDZU.address;
 
 const baseUrl = process.env.VERCEL_URL ? `https://kudzu.exchange` : `http://localhost:${process.env.PORT || 3000}`;
 
-const app = new Frog({
+type State = {
+  address: string;
+  ens: string;
+};
+
+const app = new Frog<{ State: State }>({
   basePath: "/api",
+  initialState: {
+    address: "",
+    ens: "",
+  },
 });
 
+// Initial Frame
 app.frame("/", c => {
   return c.res({
-    action: "/finish",
+    action: "/check-address",
     image: `${baseUrl}/kudzu-frame-initial-og.png`,
-    intents: [
-      <TextInput placeholder="0xAddressToInfect" />,
-      <Button.Transaction target="/infect">Infect</Button.Transaction>,
-    ],
+    intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Infect</Button>],
+  });
+});
+
+// Check if inputText is a valid address or ENS and store to state
+app.frame("/check-address", async c => {
+  const { inputText = "", deriveState } = c;
+
+  // Input is a valid address
+  if (isAddress(inputText)) {
+    deriveState(prevState => {
+      if (isAddress(inputText)) {
+        prevState.address = inputText;
+      }
+    });
+
+    return c.res({
+      action: "/finish",
+      image: (
+        <div
+          style={{
+            backgroundColor: "#0A0A0B",
+            height: "100%",
+            width: "100%",
+            color: "white",
+            display: "flex",
+            flexDirection: "column",
+            gap: 24,
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: 50,
+            paddingTop: 24,
+          }}
+        >
+          <div style={{ display: "flex" }}>The Address:</div>
+          <div style={{ display: "flex", fontSize: 44 }}>{inputText}</div>
+          <div style={{ display: "flex", paddingTop: 24 }}>Is Ready To Infect</div>
+        </div>
+      ),
+      intents: [<Button.Transaction target="/infect">Infect!</Button.Transaction>],
+    });
+  }
+
+  try {
+    const ensAddress = await mainnetPublicClient.getEnsAddress({
+      name: normalize(inputText),
+    });
+
+    // Input is a valid ENS address on Mainnet
+    if (ensAddress) {
+      deriveState(prevState => {
+        if (isAddress(ensAddress)) {
+          prevState.address = ensAddress;
+          prevState.ens = inputText;
+        }
+      });
+
+      return c.res({
+        action: "/finish",
+        image: (
+          <div
+            style={{
+              backgroundColor: "#0A0A0B",
+              height: "100%",
+              width: "100%",
+              color: "white",
+              display: "flex",
+              flexDirection: "column",
+              gap: 24,
+              justifyContent: "center",
+              alignItems: "center",
+              fontSize: 50,
+              paddingTop: 24,
+            }}
+          >
+            <div style={{ display: "flex" }}>The Address:</div>
+            <div style={{ display: "flex", fontSize: 44 }}>{ensAddress}</div>
+            <div style={{ display: "flex", paddingTop: 24 }}>Is Ready To Infect</div>
+          </div>
+        ),
+        intents: [<Button.Transaction target="/infect">Infect!</Button.Transaction>],
+      });
+    }
+  } catch (error) {
+    return c.res({
+      image: (
+        <div
+          style={{
+            backgroundColor: "#0A0A0B",
+            height: "100%",
+            width: "100%",
+            color: "white",
+            display: "flex",
+            flexDirection: "column",
+            gap: 24,
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: 50,
+            paddingTop: 24,
+          }}
+        >
+          <div style={{ display: "flex" }}>Invalid Address or ENS</div>
+          <div style={{ display: "flex" }}>Please Try Again!</div>
+        </div>
+      ),
+      intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Try Again</Button>],
+    });
+  }
+
+  // Input is NOT valid address or ENS
+  return c.res({
+    image: (
+      <div
+        style={{
+          backgroundColor: "#0A0A0B",
+          height: "100%",
+          width: "100%",
+          color: "white",
+          display: "flex",
+          flexDirection: "column",
+          gap: 24,
+          justifyContent: "center",
+          alignItems: "center",
+          fontSize: 50,
+          paddingTop: 24,
+        }}
+      >
+        <div style={{ display: "flex" }}>Invalid Address or ENS</div>
+        <div style={{ display: "flex" }}>Please Try Again!</div>
+      </div>
+    ),
+    intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Try Again</Button>],
   });
 });
 
@@ -134,14 +279,22 @@ app.frame("/finish", async c => {
 });
 
 app.transaction("/infect", c => {
-  const addressToInfect = c.inputText as `0x${string}`;
+  const { previousState } = c;
 
-  return c.contract({
-    abi,
-    chainId: `eip155:${base.id}`,
-    functionName: "publiclyInfect",
-    args: [addressToInfect],
-    to: contractAddress,
+  if (isAddress(previousState.address)) {
+    const addressToInfect = previousState.address as `0x${string}`;
+
+    return c.contract({
+      abi,
+      chainId: `eip155:${base.id}`,
+      functionName: "publiclyInfect",
+      args: [addressToInfect],
+      to: contractAddress,
+    });
+  }
+
+  return c.error({
+    message: "Invalid Address",
   });
 });
 
