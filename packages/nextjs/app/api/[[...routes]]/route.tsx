@@ -5,7 +5,7 @@ import { Button, Frog, TextInput } from "frog";
 import { devtools } from "frog/dev";
 import { handle } from "frog/next";
 import { serveStatic } from "frog/serve-static";
-import { PublicClient, createPublicClient, decodeEventLog, http, isAddress } from "viem";
+import { createPublicClient, decodeEventLog, http, isAddress } from "viem";
 import { base, mainnet } from "viem/chains";
 import { normalize } from "viem/ens";
 import deployedContracts from "~~/contracts/deployedContracts";
@@ -17,7 +17,7 @@ const publicClient = createPublicClient({
   transport: http(),
 });
 
-export const mainnetPublicClient: PublicClient = createPublicClient({
+const mainnetPublicClient = createPublicClient({
   chain: mainnet,
   transport: http(`${mainnet.rpcUrls.alchemy.http[0]}/${scaffoldConfig.alchemyApiKey}`),
 });
