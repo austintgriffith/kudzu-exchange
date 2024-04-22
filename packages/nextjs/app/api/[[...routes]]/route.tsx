@@ -49,7 +49,7 @@ app.frame("/", c => {
   return c.res({
     action: "/check-address",
     image: `${baseUrl}/kudzu-frame-initial-og.png`,
-    intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Infect</Button>],
+    intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Infect 🦠</Button>],
   });
 });
 
@@ -65,6 +65,7 @@ async function getTokenId(address: string) {
     return tokenId.toString();
   } catch (error) {
     console.log("error", error);
+    return null;
   }
 }
 
@@ -75,16 +76,27 @@ app.frame("/check-address", async c => {
   // Input is a valid address
   if (isAddress(inputText)) {
     const tokenId = await getTokenId(inputText);
+
     if (tokenId) {
+      const imageUrl = `https://virus.folia.app/img/base/${tokenId}`;
+      const openSeaUrl = `https://opensea.io/assets/base/0x94e84f2dbb9b068ea01db531e7343ec2385b7052/${tokenId}`;
+
       return c.res({
         image: (
           <Box grow alignVertical="center" background="background" padding="32">
             <Heading color="text" align="center">
               This Address Is Already Infected!
             </Heading>
+            <Box width="100%" alignHorizontal="center">
+              {tokenId && <img alt="virus" src={imageUrl} width={400} height={400} />}
+            </Box>
           </Box>
         ),
-        intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Try Another Address</Button>],
+        intents: [
+          <TextInput placeholder="ENS or 0xAddressToInfect" />,
+          <Button>Try Another Address</Button>,
+          <Button.Link href={openSeaUrl}>View On OpenSea</Button.Link>,
+        ],
       });
     }
 
@@ -120,16 +132,27 @@ app.frame("/check-address", async c => {
     // Input is a valid ENS address on Mainnet
     if (ensAddress && isAddress(ensAddress)) {
       const tokenId = await getTokenId(ensAddress);
+
       if (tokenId) {
+        const imageUrl = `https://virus.folia.app/img/base/${tokenId}`;
+        const openSeaUrl = `https://opensea.io/assets/base/0x94e84f2dbb9b068ea01db531e7343ec2385b7052/${tokenId}`;
+
         return c.res({
           image: (
             <Box grow alignVertical="center" background="background" padding="32">
               <Heading color="text" align="center">
                 This Address Is Already Infected!
               </Heading>
+              <Box width="100%" alignHorizontal="center">
+                {tokenId && <img alt="virus" src={imageUrl} width={400} height={400} />}
+              </Box>
             </Box>
           ),
-          intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Try Another Address</Button>],
+          intents: [
+            <TextInput placeholder="ENS or 0xAddressToInfect" />,
+            <Button>Try Another Address</Button>,
+            <Button.Link href={openSeaUrl}>View On OpenSea</Button.Link>,
+          ],
         });
       }
 
