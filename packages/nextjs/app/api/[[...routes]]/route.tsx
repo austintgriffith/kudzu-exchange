@@ -119,6 +119,20 @@ app.frame("/check-address", async c => {
 
     // Input is a valid ENS address on Mainnet
     if (ensAddress && isAddress(ensAddress)) {
+      const tokenId = await getTokenId(ensAddress);
+      if (tokenId) {
+        return c.res({
+          image: (
+            <Box grow alignVertical="center" background="background" padding="32">
+              <Heading color="text" align="center">
+                This Address Is Already Infected!
+              </Heading>
+            </Box>
+          ),
+          intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Try Another Address</Button>],
+        });
+      }
+
       deriveState(prevState => {
         prevState.address = ensAddress;
         prevState.ens = inputText;
