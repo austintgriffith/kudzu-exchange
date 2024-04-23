@@ -7,37 +7,31 @@ import { Abi } from "abitype";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useContractRead, useContractWrite } from "wagmi";
 import { RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
-import { useDeployedContractInfo, useScaffoldContractRead } from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 
 type KudzuContainerProps = {
   contractAddress?: string;
   mustBeForSale?: boolean;
   mustBeOwnedBy?: string;
+  owner?: string;
+  tokenIndex?: number;
 };
 
-export const KudzuContainer = ({ contractAddress, mustBeForSale, mustBeOwnedBy }: KudzuContainerProps) => {
+export const KudzuContainer = ({
+  contractAddress,
+  mustBeForSale,
+  mustBeOwnedBy,
+  owner,
+  tokenIndex,
+}: KudzuContainerProps) => {
   const { address } = useAccount();
-
-  const { data: tokenIndex } = useScaffoldContractRead({
-    contractName: "KUDZU",
-    functionName: "tokenOfOwnerByIndex",
-    args: [contractAddress, 0n],
-  });
 
   const { targetNetwork } = useTargetNetwork();
 
   const { data: deployedContractData } = useDeployedContractInfo("BasedKudzuContainerForSale");
 
   const [ethAmount, setEthAmount] = React.useState("");
-
-  const { data: owner } = useContractRead({
-    chainId: targetNetwork.id,
-    functionName: "owner",
-    address: contractAddress,
-    abi: deployedContractData?.abi,
-    watch: true,
-  });
 
   const { writeAsync: setPrice } = useContractWrite({
     chainId: targetNetwork.id,
@@ -50,14 +44,6 @@ export const KudzuContainer = ({ contractAddress, mustBeForSale, mustBeOwnedBy }
   const { data: price } = useContractRead({
     chainId: targetNetwork.id,
     functionName: "price",
-    address: contractAddress,
-    abi: deployedContractData?.abi,
-    watch: true,
-  });
-
-  const { data: isInfected } = useContractRead({
-    chainId: targetNetwork.id,
-    functionName: "isInfected",
     address: contractAddress,
     abi: deployedContractData?.abi,
     watch: true,
@@ -110,7 +96,7 @@ export const KudzuContainer = ({ contractAddress, mustBeForSale, mustBeOwnedBy }
         <div className="m-4"></div>
         {owner?.toLocaleLowerCase() === address?.toLocaleLowerCase() ? (
           <div>
-            {isInfected ? (
+            {tokenIndex ? (
               <>
                 <div className={"mb-8"}>
                   infect address from this kudzu:

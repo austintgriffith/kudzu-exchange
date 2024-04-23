@@ -8,7 +8,7 @@ import { KudzuContainer } from "~~/components/KudzuContainer";
 const Buy: NextPage = () => {
   const ContainersQuery = gql`
     query Containers($after: String, $before: String) {
-      containers(limit: 100, before: $before, after: $after) {
+      containers(limit: 500, before: $before, after: $after) {
         items {
           owner
           contract
@@ -34,16 +34,44 @@ const Buy: NextPage = () => {
     },
   });
 
+  const KudzusQuery = gql`
+    query Kudzus($contracts: [String]) {
+      kudzus(limit: 10, where: { contract_in: $contracts }) {
+        items {
+          token
+          contract
+        }
+      }
+    }
+  `;
+
+  const contractAddresses = containersData?.containers?.items?.map((item: any) => item.contract);
+
+  const [{ data: kudzusData, fetching: isLoadingKudzus }] = useQuery({
+    query: KudzusQuery,
+    variables: {
+      contracts: contractAddresses,
+    },
+  });
+
   let i = 0;
   const containerRender = containersData?.containers?.items?.map((container: any) => {
-    return <KudzuContainer key={i++} mustBeForSale={true} contractAddress={container.contract} />;
+    return (
+      <KudzuContainer
+        key={i++}
+        mustBeForSale={true}
+        contractAddress={container.contract}
+        owner={container.owner}
+        tokenIndex={kudzusData?.kudzus.items.find((item: any) => item.contract === container.contract)?.token}
+      />
+    );
   });
 
   return (
     <>
       {" "}
       <div className="flex items-center flex-col flex-grow pt-10">
-        {isLoading ? (
+        {isLoading || isLoadingKudzus ? (
           <div className="px-5">SEARCHING FOR KUDZU CONTAINERS FOR SALE.....</div>
         ) : (
           <div>
