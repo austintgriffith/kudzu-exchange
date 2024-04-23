@@ -47,6 +47,7 @@ const app = new Frog<{ State: State }>({
 // Initial Frame
 app.frame("/", c => {
   return c.res({
+    title: "Based Kudzu Exchange",
     action: "/check-address",
     image: `${baseUrl}/kudzu-frame-initial-og.png`,
     intents: [<TextInput placeholder="ENS or 0xAddressToInfect" />, <Button>Infect 🦠</Button>],
