@@ -102,7 +102,7 @@ const Home: NextPage = () => {
         </div>
       </div>
       <div className="divider p-12"></div>
-      {yourKudzuTokenId ? (
+      {yourKudzuTokenId && (
         <div className="flex items-center flex-col flex-grow pt-10">
           <h1 className="text-center">
             <div className="content-center"> 🦠 YOU ARE INFECTED WITH KUDZU:</div>
@@ -133,44 +133,44 @@ const Home: NextPage = () => {
             🦠 infect from your kudzu
           </button>
           <div className="divider p-12"></div>
-          <div>
-            <button
-              className="btn btn-secondary"
-              onClick={() => {
-                router.push("/buy");
-              }}
-            >
-              💵 buy kudzu containers
-            </button>
-          </div>
-          <div className="divider p-12"></div>
-          <div>
-            <button
-              className="btn btn-secondary"
-              onClick={() => {
-                deployContainer();
-              }}
-            >
-              🧫 deploy a kudzu container smart contract
-            </button>
-
-            {containerRender}
-          </div>
-          <div className="divider p-12"></div>
-          <div>
-            <button
-              className="btn btn-secondary"
-              onClick={() => {
-                router.push("/debug");
-              }}
-            >
-              📄 smart contracts
-            </button>
-          </div>
         </div>
-      ) : (
-        ""
       )}
+      <div className="flex items-center flex-col flex-grow pt-10">
+        <div>
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              router.push("/buy");
+            }}
+          >
+            💵 buy kudzu containers
+          </button>
+        </div>
+        <div className="divider p-12"></div>
+        <div>
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              deployContainer();
+            }}
+          >
+            🧫 deploy a kudzu container smart contract
+          </button>
+
+          {containerRender}
+        </div>
+        <div className="divider p-12"></div>
+        <div>
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              router.push("/debug");
+            }}
+          >
+            📄 smart contracts
+          </button>
+        </div>
+      </div>
     </>
   );
 };
