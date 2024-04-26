@@ -162,7 +162,7 @@ const Home: NextPage = () => {
             🧫 deploy a kudzu container smart contract
           </button>
 
-          {containerRender}
+          {connectedAddress && containerRender}
         </div>
         <div className="divider p-12"></div>
         <div>
