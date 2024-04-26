@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { NextPage } from "next";
+import { gql, useQuery } from "urql";
 import { parseEther } from "viem";
 import { useAccount } from "wagmi";
 import { KudzuContainer } from "~~/components/KudzuContainer";
 import { Address, AddressInput } from "~~/components/scaffold-eth";
-import { useScaffoldContractRead, useScaffoldContractWrite, useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
+import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
@@ -41,15 +42,21 @@ const Home: NextPage = () => {
     args: [addressToPubInfect, 0n],
   });
 
-  const { data: allContainers } = useScaffoldEventHistory({
-    contractName: "BasedKudzuContainerForSaleFactory",
-    eventName: "Created",
-    fromBlock: 10361383n,
-    watch: true,
-    /*filters: { owner: "" + connectedAddress },*/
-    blockData: false,
-    transactionData: false,
-    receiptData: false,
+  const ContainersQuery = gql`
+    query Containers($owner: String) {
+      containers(where: { owner: $owner }) {
+        items {
+          contract
+        }
+      }
+    }
+  `;
+
+  const [{ data: containersData }] = useQuery({
+    query: ContainersQuery,
+    variables: {
+      owner: connectedAddress,
+    },
   });
 
   const { writeAsync: deployContainer } = useScaffoldContractWrite({
@@ -62,10 +69,8 @@ const Home: NextPage = () => {
   const router = useRouter();
 
   let i = 0;
-  const containerRender = allContainers?.map((container: any) => {
-    return (
-      <KudzuContainer key={i++} contractAddress={container.args.contractAddress} mustBeOwnedBy={connectedAddress} />
-    );
+  const containerRender = containersData?.containers?.items?.map((container: any) => {
+    return <KudzuContainer key={i++} contractAddress={container.contract} owner={connectedAddress} />;
   });
 
   return (
@@ -157,7 +162,7 @@ const Home: NextPage = () => {
             🧫 deploy a kudzu container smart contract
           </button>
 
-          {containerRender}
+          {connectedAddress && containerRender}
         </div>
         <div className="divider p-12"></div>
         <div>
