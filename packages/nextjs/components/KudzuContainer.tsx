@@ -13,18 +13,11 @@ import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 type KudzuContainerProps = {
   contractAddress?: string;
   mustBeForSale?: boolean;
-  mustBeOwnedBy?: string;
   owner?: string;
   tokenIndex?: number;
 };
 
-export const KudzuContainer = ({
-  contractAddress,
-  mustBeForSale,
-  mustBeOwnedBy,
-  owner,
-  tokenIndex,
-}: KudzuContainerProps) => {
+export const KudzuContainer = ({ contractAddress, mustBeForSale, owner, tokenIndex }: KudzuContainerProps) => {
   const { address } = useAccount();
 
   const { targetNetwork } = useTargetNetwork();
@@ -68,10 +61,6 @@ export const KudzuContainer = ({
   });
 
   if (mustBeForSale && !price) {
-    return <></>;
-  }
-
-  if (mustBeOwnedBy && owner?.toLocaleLowerCase() !== mustBeOwnedBy?.toLocaleLowerCase()) {
     return <></>;
   }
 
