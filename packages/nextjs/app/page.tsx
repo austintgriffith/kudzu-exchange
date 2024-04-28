@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { NextPage } from "next";
 import { gql, useQuery } from "urql";
 import { parseEther } from "viem";
-import { useAccount } from "wagmi";
+import { useAccount, useWaitForTransaction } from "wagmi";
 import { KudzuContainer } from "~~/components/KudzuContainer";
 import { Address, AddressInput } from "~~/components/scaffold-eth";
 import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
@@ -59,11 +59,28 @@ const Home: NextPage = () => {
     },
   });
 
-  const { writeAsync: deployContainer } = useScaffoldContractWrite({
+  const [loadingCointainers, setLoadingContainers] = useState(false);
+
+  const { writeAsync: deployContainer, data: deployData } = useScaffoldContractWrite({
     contractName: "BasedKudzuContainerForSaleFactory",
     functionName: "create",
     args: [connectedAddress],
     value: parseEther("0.00005"),
+    onSuccess: () => {
+      setLoadingContainers(true);
+    },
+  });
+
+  useWaitForTransaction({
+    hash: deployData?.hash,
+    onSuccess: async data => {
+      const log = data?.logs[3];
+      if (log && log.topics[2]) {
+        const contractAddress = `0x${log.topics[2].substring(26)}`;
+        containersData?.containers?.items?.push({ contract: contractAddress });
+      }
+      setLoadingContainers(false);
+    },
   });
 
   const router = useRouter();
@@ -161,7 +178,7 @@ const Home: NextPage = () => {
           >
             🧫 deploy a kudzu container smart contract
           </button>
-
+          {loadingCointainers && <p>Loading new container...</p>}
           {connectedAddress && containerRender}
         </div>
         <div className="divider p-12"></div>
