@@ -83,11 +83,38 @@ const Home: NextPage = () => {
     },
   });
 
+  const KudzusQuery = gql`
+    query Kudzus($contracts: [String]) {
+      kudzus(where: { contract_in: $contracts }) {
+        items {
+          token
+          contract
+        }
+      }
+    }
+  `;
+
+  const contractAddresses = containersData?.containers?.items?.map((item: any) => item.contract);
+
+  const [{ data: kudzusData }] = useQuery({
+    query: KudzusQuery,
+    variables: {
+      contracts: contractAddresses,
+    },
+  });
+
   const router = useRouter();
 
   let i = 0;
   const containerRender = containersData?.containers?.items?.map((container: any) => {
-    return <KudzuContainer key={i++} contractAddress={container.contract} owner={connectedAddress} />;
+    return (
+      <KudzuContainer
+        key={i++}
+        contractAddress={container.contract}
+        owner={connectedAddress}
+        tokenIndex={kudzusData?.kudzus.items.find((item: any) => item.contract === container.contract)?.token}
+      />
+    );
   });
 
   return (
