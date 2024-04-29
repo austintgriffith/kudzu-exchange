@@ -40,7 +40,7 @@ const scaffoldConfig = {
    */
   walletAutoConnect: true,
 
-  indexerPollingInterval: 60000,
+  indexerPollingInterval: 30000,
 } as const satisfies ScaffoldConfig;
 
 export default scaffoldConfig;
