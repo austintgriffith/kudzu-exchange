@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { NextPage } from "next";
 import { gql, useQuery } from "urql";
+import { useInterval } from "usehooks-ts";
 import { parseEther } from "viem";
 import { useAccount, useWaitForTransaction } from "wagmi";
 import { KudzuContainer } from "~~/components/KudzuContainer";
 import { Address, AddressInput } from "~~/components/scaffold-eth";
 import { useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import scaffoldConfig from "~~/scaffold.config";
 
 const Home: NextPage = () => {
   const { address: connectedAddress } = useAccount();
@@ -96,12 +98,16 @@ const Home: NextPage = () => {
 
   const contractAddresses = containersData?.containers?.items?.map((item: any) => item.contract);
 
-  const [{ data: kudzusData }] = useQuery({
+  const [{ data: kudzusData }, reexecuteQuery] = useQuery({
     query: KudzusQuery,
     variables: {
       contracts: contractAddresses,
     },
   });
+
+  useInterval(() => {
+    reexecuteQuery({ requestPolicy: "network-only" });
+  }, scaffoldConfig.indexerPollingInterval);
 
   const router = useRouter();
 
